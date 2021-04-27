@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: otus-healthy-service
+spec:
+  selector:
+    app: otus-healthy-app
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+      name: http

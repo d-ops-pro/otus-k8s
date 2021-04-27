@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otus-healthy-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: otus-healthy-app
+  template:
+    metadata:
+      labels:
+        app: otus-healthy-app
+    spec:
+      containers:
+        - name: otus-healthy
+          image: default23/otus-healthy:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: LISTEN
+              value: "8000"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 3
