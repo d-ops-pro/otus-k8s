@@ -1,0 +1,12 @@
+fullnameOverride: users-db
+postgresqlUsername: user
+postgresqlPassword: user
+postgresqlDatabase: users
+
+service:
+  type: NodePort
+  port: 5432
+
+persistence:
+  enabled: true
+  size: 1Gi
