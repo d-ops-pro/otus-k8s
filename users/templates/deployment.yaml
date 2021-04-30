@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "users.fullname" .}}
+  labels:
+    {{- include "users.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "users.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "users.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum}}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.vcs.image }}
+          ports:
+            - name: web
+              containerPort: {{ .Values.http.port }}
+              protocol: TCP
+          env:
+            - name: DB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: users-secret
+                  key: DATABASE_URI
+            - name: LISTEN
+              valueFrom:
+                configMapKeyRef:
+                  name: users-config
+                  key: LISTEN

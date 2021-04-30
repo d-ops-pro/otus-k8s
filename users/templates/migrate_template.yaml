@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-migration"
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-migration"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: sql-migrate
+          image: default23/sql-migrate:latest
+          env:
+            - name: DATABASE_URI
+              value: {{ printf "postgresql://%s:%s@%s:%s/%s?sslmode=disable" .Values.db.user .Values.db.password .Values.db.host .Values.db.port .Values.db.name | quote }}
+            - name: GIT_REPOSITORY
+              value: {{ .Values.vcs.repository | quote}}
+            - name: GIT_BRANCH
+              value: {{ .Values.vcs.branch | quote }}
+          command:
+            - sh
+            - -c
+            - |
+              echo $DATABASE_URI
+              git clone --single-branch --branch $(GIT_BRANCH) $(GIT_REPOSITORY) /repo && \
+              cd /repo && \
+              sql-migrate up -config=dbconfig.yaml -env=development

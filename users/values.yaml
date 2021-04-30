@@ -1,4 +1,45 @@
+# Common configuration
+replicaCount: 2
+
+# Autoscaling configuration
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 40
+  targetMemoryUtilizationPercentage: 40
+
+# Ingress configuration
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  tls:
+  hosts:
+    - host: arch.homework
+      paths:
+        - path: /users($|/)(.*)
+
+# Service configuration
+service:
+  type: NodePort
+  port: 80
+
+# Location of the service source code
+# it needs to be cloned, to get the migration scripts
 vcs:
-  repository: git@github.com/d-ops-pro/otus-users.git
+  image: default23/otus-users:latest
+  repository: https://github.com/d-ops-pro/otus-users.git
   branch: master
 
+# user service HTTP server configuration
+http:
+  port: 8080
+
+# PostgreSQL database connection params
+db:
+  name: users
+  user: user
+  password: user
+  host: users-db.otus.svc.cluster.local
+  port: "5432"

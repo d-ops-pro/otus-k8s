@@ -1,0 +1,26 @@
+Available actions:
+{{- if .Values.ingress.enabled }}
+    {{- range $host := .Values.ingress.hosts }}
+      {{- range .paths }}
+      1. Create User:
+            curl -XPOST -H "Content-type: application/json" -d '{
+              "username": "johndoe589",
+              "firstName": "John",
+              "lastName": "Doe",
+              "email": "bestjohn@doe.com",
+              "phone": "+71002003040"
+            }' 'http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/users/user'
+       2. Get User:
+            curl -XGET 'http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/users/user/1'
+       3. Delete User:
+            curl -XDELETE 'http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/users/user/1'
+       4. Update User:
+            curl -XPUT -H "Content-type: application/json" -d '{
+              "firstName": "Julie",
+              "lastName": "Doe",
+              "email": "bestjohn@doe.com",
+              "phone": "+71004242424"
+            }' 'http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/users/user/1'
+      {{- end }}
+    {{- end }}
+{{- end }}
